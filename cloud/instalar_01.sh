@@ -8,7 +8,7 @@
 #autor            Gustavo Denicolay
 #email            gustavo.denicolay@gmail.com
 #fecha creacion   2017-07-20
-#fecha revision   2021-09-11 22:24
+#fecha revision   2021-09-12 00:37
 #Known BUGS       
 #ToDo Optims      
 
@@ -407,13 +407,33 @@ cat > /home/$USER/.config/systemd/user/jupyterlab.service  <<FILE
 [Unit]
 Description=JupyterLab
 [Service]
-ExecStartPre=/bin/sleep 10
 ExecStart=/home/$USER/.local/bin/jupyter-lab --no-browser --port=8888 --ip=0.0.0.0 --NotebookApp.token= --notebook-dir=$DATA_DIR
-WorkingDirectory=$DATA_DIR
+WorkingDirectory=/home/$USER/
+User=$USER
+Group=$USER
 
 [Install]
 WantedBy=default.target
 FILE
+sudo  cp   /home/$USER/.config/systemd/user/jupyterlab.service   /etc/systemd/system/
+
+
+cat > /home/$USER/install/jupyterlab.timer  <<FILE
+[Unit]
+Description=jupyterlab
+
+[Timer]
+OnBootSec=10 sec
+OnUnitActiveSec=48h
+
+[Install]
+WantedBy=timers.target
+FILE
+sudo  cp   /home/$USER/install/jupyterlab.timer   /etc/systemd/system/
+
+
+sudo systemctl enable /etc/systemd/system/jupyterlab.service
+sudo systemctl daemon-reload
 
 
 #para que se pueda ingresar a  Jupyter en forma remota
@@ -435,15 +455,11 @@ chmod   +x      /home/$USER/install/instalar_paquetes_julia_2.jl
 julia   /home/$USER/install/instalar_paquetes_julia_2.jl
 
 
-#jupyter notebook password
-systemctl --user enable /home/$USER/.config/systemd/user/jupyterlab.service
-#loginctl enable-linger
-sudo systemctl daemon-reload
 
-systemctl --user stop  jupyterlab
+sudo systemctl stop  jupyterlab
 sudo pip3  install --upgrade nbconvert
 sudo pip3  install --upgrade jupyterlab-git
-systemctl --user start jupyterlab
+sudo systemctl start jupyterlab
 #systemctl --user status jupyterlab
 
 #(crontab -l ; echo "systemctl --user start jupyterlab") | crontab -
