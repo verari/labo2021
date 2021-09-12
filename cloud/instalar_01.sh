@@ -405,8 +405,9 @@ mkdir -p ~/.config/systemd/user/
 
 cat > /home/$USER/.config/systemd/user/jupyterlab.service  <<FILE
 [Unit]
-Description=JupyterLab
+Description=jupyterlab
 [Service]
+Type=simple
 ExecStart=/home/$USER/.local/bin/jupyter-lab --no-browser --port=8888 --ip=0.0.0.0 --NotebookApp.token= --notebook-dir=$DATA_DIR
 WorkingDirectory=/home/$USER/
 User=$USER
